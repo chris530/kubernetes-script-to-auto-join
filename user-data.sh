@@ -4,7 +4,7 @@ echo "Add kubelet config"
 
 echo "K8 Node added as $(whoami)" >> /tmp/k8init
 
-apt-get install -y apt-transport-https curl
+apt-get install -y apt-transport-https curl nfs-common
 add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu \
    $(lsb_release -cs) \
@@ -16,14 +16,14 @@ deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF
 
 apt-get update
-apt-get install -y kubelet=1.12.4-00 kubeadm=1.12.4-00 kubectl=1.12.4-00 docker-ce=18.06.1~ce~3-0~ubuntu awscli jq
+apt-get install -y kubelet=1.12.4-00 kubeadm=1.12.4-00 kubectl=1.12.4-00 docker-ce=18.06.3~ce~3-0~ubuntu kubernetes-cni=0.6.0-00 awscli jq
 apt-mark hold kubelet kubeadm kubectl docker-ce
 
 # kubelet needs to be stopped
 systemctl stop kubelet
 
-cat << EOF >> /etc/default/kubelet
-KUBELET_EXTRA_ARGS=--cloud-provider=aws
+cat << EOF > /etc/default/kubelet
+KUBELET_EXTRA_ARGS="--cloud-provider=aws --cluster-dns=10.233.0.3 --cluster-domain=cluster.local --node-labels=node-role.kubernetes.io/node="
 EOF
 
 # get info from tags
